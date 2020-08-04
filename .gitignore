@@ -1,0 +1,16 @@
+*~
+.dub
+docs.json
+__dummy.html
+docs/
+/hashtrack
+hashtrack.so
+hashtrack.dylib
+hashtrack.dll
+hashtrack.a
+hashtrack.lib
+hashtrack-test-*
+*.exe
+*.o
+*.obj
+*.lst
