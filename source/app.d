@@ -55,4 +55,9 @@ void main(string[] args)
         string password = readln.strip;
         session.login(username, password);
     }
+
+    if(logout)
+    {
+        session.logout();
+    }
 }

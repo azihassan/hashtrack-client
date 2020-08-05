@@ -1,5 +1,7 @@
+import std.stdio : writeln;
 import std.path : expandTilde, dirName;
-import std.file : exists, write, mkdirRecurse;
+import std.file : exists, write, mkdirRecurse, readText;
+import std.json;
 
 string config() @property
 {
@@ -11,6 +13,13 @@ void createConfigFile()
     if(!config.exists)
     {
         mkdirRecurse(config.dirName);
-        config.write("");
+        config.write("{}");
     }
+}
+
+void put(string key, string value)
+{
+    JSONValue json = config.readText.parseJSON;
+    json.object[key].str = value;
+    config.write(json.toPrettyString());
 }
