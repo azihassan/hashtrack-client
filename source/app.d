@@ -1,7 +1,9 @@
 import std.stdio : writeln, write, readln;
 import std.string : strip;
+import std.algorithm : joiner;
 import std.getopt;
 import session;
+import tracking;
 import config : createConfigFile;
 
 void main(string[] args)
@@ -58,5 +60,37 @@ void main(string[] args)
     if(logout)
     {
         session.logout();
+    }
+
+    if(track.length > 0)
+    {
+        auto failures = tracking.track(track);
+        if(failures.length > 0)
+        {
+            writeln("The following hashtags could not be tracked");
+            foreach(k, v; failures)
+            {
+                writeln(k);
+                writeln("Cause:");
+                writeln(v.joiner("\n"));
+                writeln();
+            }
+        }
+    }
+
+    if(untrack.length > 0)
+    {
+        auto failures = tracking.untrack(untrack);
+        if(failures.length > 0)
+        {
+            writeln("The following hashtags could not be untracked");
+            foreach(k, v; failures)
+            {
+                writeln(k);
+                writeln("Cause:");
+                writeln(v.joiner("\n"));
+                writeln();
+            }
+        }
     }
 }

@@ -6,7 +6,10 @@ import std.conv : to;
 import std.array : join;
 import std.json : parseJSON, JSONValue;
 import requests : Request, Response;
-import utils : prettyPrint, isSuccessful, jsonBody;
+import utils : prettyPrint, isSuccessful, jsonBody, errors;
+import graphql : GraphQLRequest;
+import std.algorithm : each;
+import std.stdio : writeln;
 
 void login(string username, string password)
 {
@@ -15,7 +18,7 @@ void login(string username, string password)
     if(!response.isSuccessful || "errors" in response.jsonBody)
     {
         writeln("Login failed");
-        response.prettyPrint();
+        response.errors.each!(e => e.writeln);
         return;
     }
     string token = response.jsonBody["data"].object["createSession"].object["token"].str;
@@ -25,32 +28,6 @@ void login(string username, string password)
 void logout()
 {
     config.put("token", "");
-}
-
-struct GraphQLRequest
-{
-    string operationName;
-    string query;
-    JSONValue variables;
-
-    JSONValue toJson()
-    {
-        return JSONValue([
-            "operationName": JSONValue(operationName),
-            "variables": variables,
-            "query": JSONValue(query),
-        ]);
-    }
-
-    string toString()
-    {
-        return toJson().toPrettyString();
-    }
-
-    Response send()
-    {
-        return Request().post(config.get("endpoint"), toString(), "application/json");
-    }
 }
 
 GraphQLRequest createSession(string username, string password)
