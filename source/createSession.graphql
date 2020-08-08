@@ -1,0 +1,7 @@
+mutation createSession($email: String!, $password: String!) {
+    createSession(email: $email, password: $password) {
+        token
+        __typename
+    }
+}
+
