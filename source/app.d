@@ -1,6 +1,6 @@
 import std.stdio : writeln, write, readln;
 import std.string : strip;
-import std.algorithm : joiner;
+import std.algorithm : joiner, each;
 import std.getopt;
 import session;
 import tracking;
@@ -92,5 +92,10 @@ void main(string[] args)
                 writeln();
             }
         }
+    }
+
+    if(tracks)
+    {
+        tracking.tracks().each!writeln;
     }
 }

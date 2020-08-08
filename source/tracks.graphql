@@ -1,0 +1,6 @@
+query tracks {
+    tracks {
+        prettyName
+         createdAt
+    }
+}

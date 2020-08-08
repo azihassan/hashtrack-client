@@ -1,3 +1,4 @@
+import std.stdio : writeln;
 import std.algorithm : map;
 import std.string : lineSplitter, startsWith;
 import std.json : JSONValue;
@@ -36,6 +37,23 @@ string[][string] untrack(string[] hashtags)
     return failures;
 }
 
+string[] tracks()
+{
+    auto response = getTracks().send();
+    string[] hashtags;
+    if(!response.isSuccessful || "errors" in response.jsonBody)
+    {
+        response.errors.writeln;
+        return hashtags;
+    }
+
+    foreach(hashtag; response.jsonBody["data"].object["tracks"].array)
+    {
+        hashtags ~= hashtag["prettyName"].str;
+    }
+    return hashtags;
+}
+
 GraphQLRequest createTrack(string hashtag)
 {
     enum query = import("createTrack.graphql").lineSplitter().join("\n");
@@ -52,6 +70,13 @@ GraphQLRequest removeTrack(string hashtag)
         "name": hashtag
     ]);
     return GraphQLRequest("removeTrack", query, variables);
+}
+
+GraphQLRequest getTracks()
+{
+    enum query = import("tracks.graphql").lineSplitter().join("\n");
+    auto variables = JSONValue();
+    return GraphQLRequest("tracks", query, variables);
 }
 
 string prependHash(string hashtag)
