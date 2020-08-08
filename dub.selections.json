@@ -3,23 +3,17 @@
 	"versions": {
 		"botan": "1.12.18",
 		"botan-math": "1.0.3",
-		"darser": "1.0.0",
+		"cachetools": "0.3.1",
 		"diet-ng": "1.7.2",
-		"dyaml": "0.8.1",
 		"eventcore": "0.9.7",
-		"exceptionhandling": "0.1.0",
-		"fixedsizearray": "1.2.0",
-		"graphqld": "3.0.1",
 		"libasync": "0.8.6",
-		"libevent": "2.0.2+2.0.16",
 		"memutils": "1.0.4",
 		"mir-linux-kernel": "1.0.1",
-		"nullablestore": "2.1.0",
 		"openssl": "1.1.6+1.0.1g",
+		"requests": "1.1.6",
 		"stdx-allocator": "2.77.5",
 		"taggedalgebraic": "0.11.16",
-		"tinyendian": "0.2.0",
 		"vibe-core": "1.9.3",
-		"vibe-d": "0.8.6"
+		"vibe-d": "0.9.0"
 	}
 }

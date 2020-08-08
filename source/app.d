@@ -51,7 +51,6 @@ void main(string[] args)
         string username = readln.strip;
 
         write("Password : ");
-        //no getpass
         string password = readln.strip;
         session.login(username, password);
     }

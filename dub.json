@@ -1,12 +1,15 @@
 {
-	"authors": [
-		"Hassan Azi"
-	],
-	"copyright": "Copyright © 2020, Hassan Azi",
-	"dependencies": {
-		"graphqld": "~>3.0.1"
-	},
-	"description": "Hashtrack client in D",
-	"license": "proprietary",
-	"name": "hashtrack"
+    "authors": [
+        "Hassan Azi"
+    ],
+    "copyright": "Copyright © 2020, Hassan Azi",
+    "dependencies": {
+        "requests": "~>1"
+    },
+    "description": "Hashtrack client in D",
+    "license": "proprietary",
+    "name": "hashtrack",
+    "stringImportPaths": [
+        "source/"
+    ]
 }
