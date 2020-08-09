@@ -22,11 +22,8 @@ void main(string[] args)
 
     //weird
     arraySep = ",";
-
-
     //accidently reversed the order of the args
     auto opts = args.getopt(
-        std.getopt.config.passThrough,
         "login", "Creates a session token and store it in the local filesystem in a config file", &login,
         "logout", "Remove the locally stored session token", &logout,
         "track", "Tracks one or more hashtags", &track,
@@ -97,5 +94,10 @@ void main(string[] args)
     if(tracks)
     {
         tracking.tracks().each!writeln;
+    }
+
+    if(list)
+    {
+        tracking.list().each!writeln;
     }
 }

@@ -1,6 +1,7 @@
-import requests : Response;
+import requests : Response, RequestException;
 import std.json : parseJSON, JSONValue;
 import std.stdio : writeln;
+import std.string : join;
 
 bool isSuccessful(Response response)
 {
@@ -76,5 +77,16 @@ JSONValue jsonBody(Response response)
     //doesn't work : return cast(string)(response.responseBody).parseJSON();
     //works : return (cast(string)(response.responseBody)).parseJSON();
     return parseJSON(cast(string) response.responseBody);
+}
+
+
+void throwOnFailure(Response response)
+{
+    if(!response.isSuccessful || "errors" in response.jsonBody)
+    {
+        string[] errors = response.errors;
+        writeln(response);
+        throw new RequestException(errors.join("\n"));
+    }
 }
 
