@@ -3,115 +3,122 @@ import std.algorithm : map;
 import std.string : lineSplitter, startsWith, format, wrap, replace;
 import std.json : JSONValue;
 import std.array : join;
-import config;
+
 import utils : isSuccessful, toPrettyString, jsonBody, errors, throwOnFailure;
 import graphql : GraphQLRequest;
+import config : Config;
 
-string[][string] track(string[] hashtags)
+struct Tracking
 {
-    string[][string] failures;
-    foreach(hashtag; hashtags.map!prependHash)
+    Config configuration;
+
+    this(Config configuration)
     {
-        auto request = createTrack(hashtag);
-        auto response = request.send();
+        this.configuration = configuration;
+    }
+
+    string[][string] track(string[] hashtags)
+    {
+        string[][string] failures;
+        foreach(hashtag; hashtags.map!prependHash)
+        {
+            auto request = createTrack(hashtag);
+            auto response = request.send();
+            if(!response.isSuccessful || "errors" in response.jsonBody)
+            {
+                failures[hashtag] = response.errors;
+            }
+        }
+        return failures;
+    }
+
+    string[][string] untrack(string[] hashtags)
+    {
+        string[][string] failures;
+        foreach(hashtag; hashtags.map!prependHash)
+        {
+            auto request = removeTrack(hashtag);
+            auto response = request.send();
+            if(!response.isSuccessful || "errors" in response.jsonBody)
+            {
+                failures[hashtag] = response.errors;
+            }
+        }
+        return failures;
+    }
+
+    string[] tracks()
+    {
+        auto response = getTracks().send();
+        string[] hashtags;
         if(!response.isSuccessful || "errors" in response.jsonBody)
         {
-            failures[hashtag] = response.errors;
+            response.errors.writeln;
+            return hashtags;
         }
-    }
-    return failures;
-}
 
-string[][string] untrack(string[] hashtags)
-{
-    string[][string] failures;
-    foreach(hashtag; hashtags.map!prependHash)
-    {
-        auto request = removeTrack(hashtag);
-        auto response = request.send();
-        if(!response.isSuccessful || "errors" in response.jsonBody)
+        foreach(hashtag; response.jsonBody["data"].object["tracks"].array)
         {
-            failures[hashtag] = response.errors;
+            hashtags ~= hashtag["prettyName"].str;
         }
-    }
-    return failures;
-}
-
-string[] tracks()
-{
-    auto response = getTracks().send();
-    string[] hashtags;
-    if(!response.isSuccessful || "errors" in response.jsonBody)
-    {
-        response.errors.writeln;
         return hashtags;
     }
 
-    foreach(hashtag; response.jsonBody["data"].object["tracks"].array)
+    Tweet[] list(string search = "")
     {
-        hashtags ~= hashtag["prettyName"].str;
+        Tweet[] tweets;
+        auto request = getTweets(search);
+        auto response = request.send();
+        response.throwOnFailure();
+
+        foreach(tweet; response.jsonBody["data"].object["tweets"].array)
+        {
+            tweets ~= Tweet(
+                    tweet["id"].str,
+                    tweet["authorName"].str,
+                    tweet["text"].str,
+                    tweet["publishedAt"].str
+                    );
+        }
+        return tweets;
     }
-    return hashtags;
-}
 
-Tweet[] list(string search = "")
-{
-    Tweet[] tweets;
-    auto request = getTweets(search);
-    auto response = request.send();
-    response.throwOnFailure();
-
-    foreach(tweet; response.jsonBody["data"].object["tweets"].array)
+    private GraphQLRequest createTrack(string hashtag)
     {
-        tweets ~= Tweet(
-            tweet["id"].str,
-            tweet["authorName"].str,
-            tweet["text"].str,
-            tweet["publishedAt"].str
-        );
+        enum query = import("createTrack.graphql").lineSplitter().join("\n");
+        auto variables = JSONValue([
+                "name": hashtag
+        ]);
+        return GraphQLRequest("createTrack", query, variables, configuration);
     }
-    return tweets;
-}
 
-GraphQLRequest createTrack(string hashtag)
-{
-    enum query = import("createTrack.graphql").lineSplitter().join("\n");
-    auto variables = JSONValue([
-        "name": hashtag
-    ]);
-    return GraphQLRequest("createTrack", query, variables);
-}
+    private GraphQLRequest removeTrack(string hashtag)
+    {
+        enum query = import("removeTrack.graphql").lineSplitter().join("\n");
+        auto variables = JSONValue([
+                "name": hashtag
+        ]);
+        return GraphQLRequest("removeTrack", query, variables, configuration);
+    }
 
-GraphQLRequest removeTrack(string hashtag)
-{
-    enum query = import("removeTrack.graphql").lineSplitter().join("\n");
-    auto variables = JSONValue([
-        "name": hashtag
-    ]);
-    return GraphQLRequest("removeTrack", query, variables);
-}
+    private GraphQLRequest getTracks()
+    {
+        enum query = import("tracks.graphql").lineSplitter().join("\n");
+        auto variables = JSONValue();
+        return GraphQLRequest("tracks", query, variables, configuration);
+    }
 
-GraphQLRequest getTracks()
-{
-    enum query = import("tracks.graphql").lineSplitter().join("\n");
-    auto variables = JSONValue();
-    return GraphQLRequest("tracks", query, variables);
-}
-
-GraphQLRequest getTweets(string search = "")
-{
-    enum query = import("tweets.graphql").lineSplitter().join("\n");
-    auto variables = JSONValue(["search": search]);
-    return GraphQLRequest("tweets", query, variables);
+    private GraphQLRequest getTweets(string search = "")
+    {
+        enum query = import("tweets.graphql").lineSplitter().join("\n");
+        auto variables = JSONValue(["search": search]);
+        return GraphQLRequest("tweets", query, variables, configuration);
+    }
 }
 
 string prependHash(string hashtag)
 {
-    if(hashtag.startsWith('#'))
-    {
-        return hashtag;
-    }
-    return '#' ~ hashtag;
+    return hashtag.startsWith('#') ? hashtag : '#' ~ hashtag;
 }
 
 unittest
@@ -146,4 +153,13 @@ struct Tweet
             url
         );
     }
+}
+
+unittest
+{
+    auto tweet = Tweet("ID", "Hassan", "This is a test", "XXX");
+    assert(tweet.url == "https://twitter.com/Hassan/status/ID");
+
+    tweet = Tweet("ID", "@Hassan", "This is a test", "XXX");
+    assert(tweet.url == "https://twitter.com/Hassan/status/ID");
 }

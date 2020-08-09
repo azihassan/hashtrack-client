@@ -1,55 +1,66 @@
-import config;
 import std.stdio : writeln;
 import std.file : readText;
 import std.string : format, strip, lineSplitter;
 import std.conv : to;
 import std.array : join;
 import std.json : parseJSON, JSONValue;
-import requests : Request, Response;
-import utils : prettyPrint, isSuccessful, jsonBody, errors, throwOnFailure;
-import graphql : GraphQLRequest;
 import std.algorithm : each;
 import std.stdio : writeln;
 
-void login(string username, string password)
-{
-    auto request = createSession(username, password);
-    auto response = request.send();
-    response.throwOnFailure();
-    string token = response.jsonBody["data"].object["createSession"].object["token"].str;
-    config.put("token", token);
-}
+import requests : Request, Response;
+import utils : prettyPrint, isSuccessful, jsonBody, errors, throwOnFailure;
+import graphql : GraphQLRequest;
+import config : Config;
 
-void logout()
+struct Session
 {
-    config.put("token", "");
-}
+    Config configuration;
 
-User status()
-{
-    auto request = currentUser();
-    auto response = request.send();
-    response.throwOnFailure();
-    auto content = response.jsonBody["data"].object["currentUser"].object;
-    return User(
-        content["id"].str,
-        content["name"].str,
-        content["email"].str
-    );
-}
+    this(Config configuration)
+    {
+        this.configuration = configuration;
+    }
 
-GraphQLRequest createSession(string username, string password)
-{
-    enum query = import("createSession.graphql").lineSplitter().join("\n");
-    auto variables = SessionPayload(username, password).toJson();
-    return GraphQLRequest("createSession", query, variables);
-}
+    void login(string username, string password)
+    {
+        auto request = createSession(username, password);
+        auto response = request.send();
+        response.throwOnFailure();
+        string token = response.jsonBody["data"].object["createSession"].object["token"].str;
+        configuration.put("token", token);
+    }
 
-GraphQLRequest currentUser()
-{
-    enum query = import("currentUser.graphql").lineSplitter().join("\n");
-    auto variables = JSONValue();
-    return GraphQLRequest("currentUser", query, variables);
+    void logout()
+    {
+        configuration.put("token", "");
+    }
+
+    User status()
+    {
+        auto request = currentUser();
+        auto response = request.send();
+        response.throwOnFailure();
+        auto content = response.jsonBody["data"].object["currentUser"].object;
+        return User(
+                content["id"].str,
+                content["name"].str,
+                content["email"].str
+                );
+    }
+
+    GraphQLRequest createSession(string username, string password)
+    {
+        enum query = import("createSession.graphql").lineSplitter().join("\n");
+        auto variables = SessionPayload(username, password).toJson();
+        return GraphQLRequest("createSession", query, variables, configuration);
+    }
+
+    GraphQLRequest currentUser()
+    {
+        enum query = import("currentUser.graphql").lineSplitter().join("\n");
+        auto variables = JSONValue();
+        return GraphQLRequest("currentUser", query, variables, configuration);
+    }
 }
 
 struct SessionPayload

@@ -1,12 +1,13 @@
 import std.json : JSONValue;
-import config;
 import requests : Request, Response;
+import config : Config;
 
 struct GraphQLRequest
 {
     string operationName;
     string query;
     JSONValue variables;
+    Config config;
 
     JSONValue toJson()
     {
