@@ -1,7 +1,0 @@
-steps:
-    - uses: actions/checkout@v2
-    - uses: dlang-community/setup-dlang@v1
-      with:
-        compiler: dmd-latest
-    - name: Build
-      run: dub
