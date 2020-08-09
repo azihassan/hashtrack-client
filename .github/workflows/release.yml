@@ -20,3 +20,8 @@ jobs:
       - name: Build
         run: dub build -b release
 
+      - name: Upload executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: hashtrack
+          path: hashtrack
