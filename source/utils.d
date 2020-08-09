@@ -85,7 +85,6 @@ void throwOnFailure(Response response)
     if(!response.isSuccessful || "errors" in response.jsonBody)
     {
         string[] errors = response.errors;
-        writeln(response);
         throw new RequestException(errors.join("\n"));
     }
 }

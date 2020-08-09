@@ -100,4 +100,9 @@ void main(string[] args)
     {
         tracking.list().each!writeln;
     }
+
+    if(status)
+    {
+        session.status.writeln;
+    }
 }
