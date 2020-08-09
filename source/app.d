@@ -98,7 +98,8 @@ void main(string[] args)
 
     if(list)
     {
-        tracking.list().each!writeln;
+        string filter = args.length > 1 ? args[1] : "";
+        tracking.list(filter).each!writeln;
     }
 
     if(status)
