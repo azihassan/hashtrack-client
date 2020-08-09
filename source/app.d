@@ -1,7 +1,9 @@
 import std.stdio : writeln, write, readln;
 import std.string : strip;
+import std.algorithm : joiner, each;
 import std.getopt;
 import session;
+import tracking;
 import config : createConfigFile;
 
 void main(string[] args)
@@ -20,11 +22,8 @@ void main(string[] args)
 
     //weird
     arraySep = ",";
-
-
     //accidently reversed the order of the args
     auto opts = args.getopt(
-        std.getopt.config.passThrough,
         "login", "Creates a session token and store it in the local filesystem in a config file", &login,
         "logout", "Remove the locally stored session token", &logout,
         "track", "Tracks one or more hashtags", &track,
@@ -58,5 +57,47 @@ void main(string[] args)
     if(logout)
     {
         session.logout();
+    }
+
+    if(track.length > 0)
+    {
+        auto failures = tracking.track(track);
+        if(failures.length > 0)
+        {
+            writeln("The following hashtags could not be tracked");
+            foreach(k, v; failures)
+            {
+                writeln(k);
+                writeln("Cause:");
+                writeln(v.joiner("\n"));
+                writeln();
+            }
+        }
+    }
+
+    if(untrack.length > 0)
+    {
+        auto failures = tracking.untrack(untrack);
+        if(failures.length > 0)
+        {
+            writeln("The following hashtags could not be untracked");
+            foreach(k, v; failures)
+            {
+                writeln(k);
+                writeln("Cause:");
+                writeln(v.joiner("\n"));
+                writeln();
+            }
+        }
+    }
+
+    if(tracks)
+    {
+        tracking.tracks().each!writeln;
+    }
+
+    if(list)
+    {
+        tracking.list().each!writeln;
     }
 }

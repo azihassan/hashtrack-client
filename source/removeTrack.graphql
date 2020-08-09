@@ -1,0 +1,8 @@
+mutation removeTrack($name: String!) {
+    removeTrack(hashtag: $name) {
+        hashtagName
+        prettyName
+        createdAt
+         __typename
+    }
+}
