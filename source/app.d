@@ -2,6 +2,7 @@ import std.stdio : writeln, write, readln;
 import std.string : strip;
 import std.algorithm : joiner, each;
 import std.path : expandTilde;
+import core.time : seconds;
 import std.getopt;
 
 import session : Session;
@@ -107,5 +108,10 @@ void main(string[] args)
     if(status)
     {
         Session(configuration).status.writeln;
+    }
+
+    if(watch)
+    {
+        Tracking(configuration).watch!writeln(5.seconds);
     }
 }

@@ -1,8 +1,10 @@
 import std.stdio : writeln;
-import std.algorithm : map;
+import std.algorithm : map, each;
 import std.string : lineSplitter, startsWith, format, wrap, replace;
 import std.json : JSONValue;
 import std.array : join;
+import core.thread : Thread;
+import core.time : Duration;
 
 import utils : isSuccessful, toPrettyString, jsonBody, errors, throwOnFailure;
 import graphql : GraphQLRequest;
@@ -81,6 +83,22 @@ struct Tracking
                     );
         }
         return tweets;
+    }
+
+    void watch(alias callback)(Duration refreshRate)
+    {
+        string lastId = "";
+        while(true)
+        {
+            auto tweets = list();
+            if(tweets.length > 0 && tweets[0].id == lastId)
+            {
+                continue;
+            }
+            lastId = tweets[0].id;
+            tweets.each!callback;
+            Thread.sleep(refreshRate);
+        }
     }
 
     private GraphQLRequest createTrack(string hashtag)
