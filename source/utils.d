@@ -1,9 +1,11 @@
+module utils;
+
 import requests : Response, RequestException;
 import std.json : parseJSON, JSONValue;
 import std.stdio : writeln;
 import std.string : join;
 
-bool isSuccessful(Response response)
+bool isSuccessful(const Response response)
 {
     return 200 <= response.code && response.code < 300;
 }
@@ -12,6 +14,7 @@ string[] errors(Response response)
 {
     return response.jsonBody.errors;
 }
+
 string[] errors(JSONValue jsonBody)
 {
     string[] result;

@@ -1,11 +1,11 @@
-import std.stdio : writeln;
+module session;
+
 import std.file : readText;
 import std.string : format, strip, lineSplitter;
 import std.conv : to;
 import std.array : join;
 import std.json : parseJSON, JSONValue;
 import std.algorithm : each;
-import std.stdio : writeln;
 
 import requests : Request, Response;
 import utils : prettyPrint, isSuccessful, jsonBody, errors, throwOnFailure;
@@ -14,12 +14,7 @@ import config : Config;
 
 struct Session
 {
-    Config configuration;
-
-    this(Config configuration)
-    {
-        this.configuration = configuration;
-    }
+    Config config;
 
     void login(string username, string password)
     {
@@ -27,12 +22,12 @@ struct Session
         auto response = request.send();
         response.throwOnFailure();
         string token = response.jsonBody["data"].object["createSession"].object["token"].str;
-        configuration.put("token", token);
+        config.put("token", token);
     }
 
     void logout()
     {
-        configuration.put("token", "");
+        config.put("token", "");
     }
 
     User status()
@@ -42,24 +37,24 @@ struct Session
         response.throwOnFailure();
         auto content = response.jsonBody["data"].object["currentUser"].object;
         return User(
-                content["id"].str,
-                content["name"].str,
-                content["email"].str
-                );
+            content["id"].str,
+            content["name"].str,
+            content["email"].str
+        );
     }
 
     GraphQLRequest createSession(string username, string password)
     {
         enum query = import("createSession.graphql").lineSplitter().join("\n");
         auto variables = SessionPayload(username, password).toJson();
-        return GraphQLRequest("createSession", query, variables, configuration);
+        return GraphQLRequest("createSession", query, variables, config);
     }
 
     GraphQLRequest currentUser()
     {
         enum query = import("currentUser.graphql").lineSplitter().join("\n");
         auto variables = JSONValue();
-        return GraphQLRequest("currentUser", query, variables, configuration);
+        return GraphQLRequest("currentUser", query, variables, config);
     }
 }
 
@@ -69,7 +64,7 @@ struct SessionPayload
     string password;
 
     //todo : make this a template mixin or something
-    JSONValue toJson()
+    JSONValue toJson() const
     {
         return JSONValue([
             "email": JSONValue(email),
@@ -77,7 +72,7 @@ struct SessionPayload
         ]);
     }
 
-    string toString()
+    string toString() const
     {
         return toJson().toPrettyString();
     }
@@ -89,7 +84,7 @@ struct User
     string name;
     string email;
 
-    JSONValue toJson()
+    JSONValue toJson() const
     {
         return JSONValue([
             "id": JSONValue(id),
@@ -98,7 +93,7 @@ struct User
         ]);
     }
 
-    string toString()
+    string toString() const
     {
         return toJson().toPrettyString();
     }
