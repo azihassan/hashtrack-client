@@ -1,5 +1,7 @@
+module graphql;
+
 import std.json : JSONValue;
-import requests : Request, Response;
+import requests : Response, Request;
 import config : Config;
 
 struct GraphQLRequest
@@ -7,9 +9,9 @@ struct GraphQLRequest
     string operationName;
     string query;
     JSONValue variables;
-    Config config;
+    Config configuration;
 
-    JSONValue toJson()
+    JSONValue toJson() const
     {
         return JSONValue([
             "operationName": JSONValue(operationName),
@@ -18,15 +20,15 @@ struct GraphQLRequest
         ]);
     }
 
-    string toString()
+    string toString() const
     {
         return toJson().toPrettyString();
     }
 
-    Response send()
+    Response send() const
     {
         auto request = Request();
-        request.addHeaders(["Authorization": config.get("token", "")]);
-        return request.post(config.get("endpoint"), toString(), "application/json");
+        request.addHeaders(["Authorization": configuration.get("token", "")]);
+        return request.post(configuration.get("endpoint"), toString(), "application/json");
     }
 }

@@ -1,9 +1,9 @@
 import std.stdio : writeln, write, readln;
 import std.string : strip;
-import std.algorithm : joiner, each;
+import std.algorithm.iteration : each, joiner;
 import std.path : expandTilde;
 import core.time : seconds;
-import std.getopt;
+import std.getopt : arraySep, getopt, defaultGetoptPrinter;
 
 import session : Session;
 import tracking : Tracking;
@@ -22,6 +22,7 @@ void main(string[] args)
     string endpoint;
     string configPath = expandTilde("~/.config/hashtrack/config.json");
 
+
     //weird
     arraySep = ",";
     //accidently reversed the order of the args
@@ -37,6 +38,7 @@ void main(string[] args)
         "endpoint", "Point to another server", &endpoint,
         "config", "Load a custom config file", &configPath
     );
+
 
     //how to handle "no arguments were passed"
     if(opts.helpWanted)
@@ -101,8 +103,8 @@ void main(string[] args)
 
     if(list)
     {
-        string filter = args.length > 1 ? args[1] : "";
-        Tracking(configuration).list.each!writeln;
+        const filter = args.length > 1 ? args[1] : "";
+        Tracking(configuration).list(filter).each!writeln;
     }
 
     if(status)

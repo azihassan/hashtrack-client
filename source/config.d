@@ -1,3 +1,5 @@
+module config;
+
 import std.stdio : writeln;
 import std.path : dirName;
 import std.file : exists, write, mkdirRecurse, readText;
@@ -33,7 +35,7 @@ struct Config
         path.write(json.toPrettyString());
     }
 
-    string get(string key)
+    string get(string key) const
     {
         string value = get(key, null);
         if(value == null)
@@ -43,7 +45,7 @@ struct Config
         return value;
     }
 
-    string get(string key, string defaultValue)
+    string get(string key, string defaultValue) const
     {
         if(key == "endpoint" && endpoint != "")
         {

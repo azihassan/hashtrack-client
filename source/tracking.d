@@ -1,10 +1,12 @@
+module tracking;
+
 import std.stdio : writeln;
 import std.algorithm : map, each;
 import std.string : lineSplitter, startsWith, format, wrap, replace;
 import std.json : JSONValue;
 import std.array : join;
 import core.thread : Thread;
-import core.time : Duration;
+import core.time : Duration, seconds;
 
 import utils : isSuccessful, toPrettyString, jsonBody, errors, throwOnFailure;
 import graphql : GraphQLRequest;
@@ -12,19 +14,14 @@ import config : Config;
 
 struct Tracking
 {
-    Config configuration;
-
-    this(Config configuration)
-    {
-        this.configuration = configuration;
-    }
+    Config config;
 
     string[][string] track(string[] hashtags)
     {
         string[][string] failures;
         foreach(hashtag; hashtags.map!prependHash)
         {
-            auto request = createTrack(hashtag);
+            const request = createTrack(hashtag);
             auto response = request.send();
             if(!response.isSuccessful || "errors" in response.jsonBody)
             {
@@ -39,7 +36,7 @@ struct Tracking
         string[][string] failures;
         foreach(hashtag; hashtags.map!prependHash)
         {
-            auto request = removeTrack(hashtag);
+            const request = removeTrack(hashtag);
             auto response = request.send();
             if(!response.isSuccessful || "errors" in response.jsonBody)
             {
@@ -76,11 +73,11 @@ struct Tracking
         foreach(tweet; response.jsonBody["data"].object["tweets"].array)
         {
             tweets ~= Tweet(
-                    tweet["id"].str,
-                    tweet["authorName"].str,
-                    tweet["text"].str,
-                    tweet["publishedAt"].str
-                    );
+                tweet["id"].str,
+                tweet["authorName"].str,
+                tweet["text"].str,
+                tweet["publishedAt"].str
+            );
         }
         return tweets;
     }
@@ -104,33 +101,29 @@ struct Tracking
     private GraphQLRequest createTrack(string hashtag)
     {
         enum query = import("createTrack.graphql").lineSplitter().join("\n");
-        auto variables = JSONValue([
-                "name": hashtag
-        ]);
-        return GraphQLRequest("createTrack", query, variables, configuration);
+        auto variables = JSONValue(["name": hashtag]);
+        return GraphQLRequest("createTrack", query, variables, config);
     }
 
     private GraphQLRequest removeTrack(string hashtag)
     {
         enum query = import("removeTrack.graphql").lineSplitter().join("\n");
-        auto variables = JSONValue([
-                "name": hashtag
-        ]);
-        return GraphQLRequest("removeTrack", query, variables, configuration);
+        auto variables = JSONValue(["name": hashtag]);
+        return GraphQLRequest("removeTrack", query, variables, config);
     }
 
     private GraphQLRequest getTracks()
     {
         enum query = import("tracks.graphql").lineSplitter().join("\n");
         auto variables = JSONValue();
-        return GraphQLRequest("tracks", query, variables, configuration);
+        return GraphQLRequest("tracks", query, variables, config);
     }
 
     private GraphQLRequest getTweets(string search = "")
     {
         enum query = import("tweets.graphql").lineSplitter().join("\n");
         auto variables = JSONValue(["search": search]);
-        return GraphQLRequest("tweets", query, variables, configuration);
+        return GraphQLRequest("tweets", query, variables, config);
     }
 }
 
@@ -154,22 +147,14 @@ struct Tweet
     string text;
     string publishedAt;
 
-    string url() @property
+    string url() @property const
     {
-        return format!`https://twitter.com/%s/status/%s`(
-            authorName.replace("@", ""),
-            id
-        );
+        return format!`https://twitter.com/%s/status/%s`(authorName.replace("@", ""), id);
     }
 
-    string toString()
+    string toString() const
     {
-        return format!"%s (%s)\n%s\n%s\n"(
-            authorName,
-            publishedAt,
-            text.wrap(60),
-            url
-        );
+        return format!"%s (%s)\n%s\n%s\n"(authorName, publishedAt, text.wrap(60), url);
     }
 }
 
