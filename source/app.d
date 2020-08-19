@@ -40,7 +40,7 @@ void main(string[] args)
 
 
     //how to handle "no arguments were passed"
-    if(args.length == 1 || opts.helpWanted)
+    if(opts.helpWanted)
     {
         defaultGetoptPrinter("Usage of the hashtrack client :", opts.options);
         return;
