@@ -22,7 +22,6 @@ void main(string[] args)
     string endpoint;
     string configPath = expandTilde("~/.config/hashtrack/config.json");
 
-
     //weird
     arraySep = ",";
     //accidently reversed the order of the args
@@ -41,7 +40,7 @@ void main(string[] args)
 
 
     //how to handle "no arguments were passed"
-    if(opts.helpWanted)
+    if(args.length == 1 || opts.helpWanted)
     {
         defaultGetoptPrinter("Usage of the hashtrack client :", opts.options);
         return;
