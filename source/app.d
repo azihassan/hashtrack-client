@@ -8,6 +8,7 @@ import std.getopt : arraySep, getopt, defaultGetoptPrinter;
 import session : Session;
 import tracking : Tracking;
 import config : Config;
+import getpass : getpass;
 
 void main(string[] args)
 {
@@ -53,8 +54,7 @@ void main(string[] args)
         write("Username : ");
         string username = readln.strip;
 
-        write("Password : ");
-        string password = readln.strip;
+        string password = getpass("Password : ");
         Session(configuration).login(username, password);
     }
 
