@@ -18,5 +18,5 @@ This is a command line client for [Hashtrack](https://hashtrack.herokuapp.com/).
 -h     --help This help information.
 ```
 
-[![asciicast](https://asciinema.org/a/8X0K30qiHNEU317kXNBiBHkxn.svg)](https://asciinema.org/a/8X0K30qiHNEU317kXNBiBHkxn)
+[![asciicast](https://asciinema.org/a/gGwiiNQPyAL7IZ6pmR6C6i1nv.svg)](https://asciinema.org/a/gGwiiNQPyAL7IZ6pmR6C6i1nv)
 
