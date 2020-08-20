@@ -103,7 +103,9 @@ void main(string[] args)
     if(list)
     {
         const filter = args.length > 1 ? args[1] : "";
-        Tracking(configuration).list(filter).each!writeln;
+        Tracking(configuration).list(filter).each!(
+            tweet => tweet.toPrettyString().writeln()
+        );
     }
 
     if(status)

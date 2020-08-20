@@ -7,10 +7,12 @@ import std.json : JSONValue;
 import std.array : join;
 import core.thread : Thread;
 import core.time : Duration, seconds;
+import std.datetime.systime : SysTime;
 
 import utils : isSuccessful, toPrettyString, jsonBody, errors, throwOnFailure;
 import graphql : GraphQLRequest;
 import config : Config;
+import term : bold, cyan, dimmed;
 
 struct Tracking
 {
@@ -93,7 +95,7 @@ struct Tracking
                 continue;
             }
             lastId = tweets[0].id;
-            tweets.each!callback;
+            tweets.map!(tweet => tweet.toPrettyString()).each!callback;
             Thread.sleep(refreshRate);
         }
     }
@@ -145,7 +147,15 @@ struct Tweet
     string id;
     string authorName;
     string text;
-    string publishedAt;
+    SysTime publishedAt;
+
+    this(string id, string authorName, string text, string publishedAt)
+    {
+        this.id = id;
+        this.authorName = authorName;
+        this.text = text;
+        this.publishedAt = SysTime.fromISOExtString(publishedAt);
+    }
 
     string url() @property const
     {
@@ -154,15 +164,30 @@ struct Tweet
 
     string toString() const
     {
-        return format!"%s (%s)\n%s\n%s\n"(authorName, publishedAt, text.wrap(60), url);
+        return format!"%s (%s)\n%s\n%s\n"(
+            authorName,
+            publishedAt.toSimpleString(),
+            text.wrap(60),
+            url
+        );
+    }
+
+    string toPrettyString() const
+    {
+        return format!"%s (%s)\n%s\n%s\n"(
+            authorName.bold().cyan(),
+            publishedAt.toSimpleString(),
+            text.wrap(60),
+            url.dimmed()
+        );
     }
 }
 
 unittest
 {
-    auto tweet = Tweet("ID", "Hassan", "This is a test", "XXX");
+    auto tweet = Tweet("ID", "Hassan", "This is a test", "2020-08-20T14:27:01.000Z");
     assert(tweet.url == "https://twitter.com/Hassan/status/ID");
 
-    tweet = Tweet("ID", "@Hassan", "This is a test", "XXX");
+    tweet = Tweet("ID", "@Hassan", "This is a test", "2020-08-20T14:27:01.000Z");
     assert(tweet.url == "https://twitter.com/Hassan/status/ID");
 }
