@@ -172,14 +172,24 @@ struct Tweet
         );
     }
 
-    string toPrettyString() const
+    version(Posix)
     {
-        return format!"%s (%s)\n%s\n%s\n"(
-            authorName.bold().cyan(),
-            publishedAt.toSimpleString(),
-            text.wrap(60),
-            url.dimmed()
-        );
+        string toPrettyString() const
+        {
+            return format!"%s (%s)\n%s\n%s\n"(
+                authorName.bold().cyan(),
+                publishedAt.toSimpleString(),
+                text.wrap(60),
+                url.dimmed()
+            );
+        }
+    }
+    else
+    {
+        string toPrettyString() const
+        {
+            return toString();
+        }
     }
 }
 
